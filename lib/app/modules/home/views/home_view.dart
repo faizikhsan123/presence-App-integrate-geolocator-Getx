@@ -1,17 +1,25 @@
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
+import 'package:presense_app/app/routes/app_pages.dart';
 
 import '../controllers/home_controller.dart';
 
 class HomeView extends GetView<HomeController> {
-  const HomeView({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('HomeView'),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.person_outline),
+            onPressed: () =>Get.toNamed(Routes.ADD_PEGAWAI), //mengarahkan ke halaman add pegawai
+          ),
+          
+        ],
       ),
       body: Center(
         child: Text(
