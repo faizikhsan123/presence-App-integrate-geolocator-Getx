@@ -6,7 +6,7 @@ import 'package:presense_app/firebase_options.dart';
 
 import 'app/routes/app_pages.dart';
 
-void main() async { //tambahkan nih
+void main() async { //tambahkan nih kek biasanya
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(
