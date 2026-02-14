@@ -29,6 +29,7 @@ class LoginController extends GetxController {
     if (userCredential.user != null) { //jjika ada user dan emailnya sudah terverifikasi ,ambil ke halaman home
       if (userCredential.user!.emailVerified == true) { //email verified ini menandakan bahwa email sudah terverifikasi
            Get.offNamed(Routes.HOME);
+          return;
       }
       Get.defaultDialog( //ini ada user tapi emailnya belum terverifikasi
         title: 'Verifikasi Email',

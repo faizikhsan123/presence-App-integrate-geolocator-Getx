@@ -16,7 +16,7 @@ class HomeView extends GetView<HomeController> {
         actions: [
           IconButton(
             icon: const Icon(Icons.person_outline),
-            onPressed: () =>Get.toNamed(Routes.ADD_PEGAWAI), //mengarahkan ke halaman add pegawai
+            onPressed: () =>Get.toNamed(Routes.ADD_PEGAWAI),
           ),
           
         ],
@@ -27,6 +27,9 @@ class HomeView extends GetView<HomeController> {
           style: TextStyle(fontSize: 20),
         ),
       ),
+      floatingActionButton: FloatingActionButton(onPressed: (){
+        controller.logout(); //logout
+      }, child: Icon(Icons.logout),),
     );
   }
 }
