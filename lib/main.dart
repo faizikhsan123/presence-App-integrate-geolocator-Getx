@@ -6,14 +6,14 @@ import 'package:presense_app/firebase_options.dart';
 
 import 'app/routes/app_pages.dart';
 
-void main() async { //tambahkan nih kek biasanya
+void main() async { 
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(
     GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: "Application",
-      initialRoute: AppPages.INITIAL,
+      initialRoute: Routes.LOGIN, //mengarahkan ke halaman login
       getPages: AppPages.routes,
     ),
   );
