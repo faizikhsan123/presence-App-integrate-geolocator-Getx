@@ -8,9 +8,15 @@ import 'package:presense_app/app/routes/app_pages.dart';
 class LoginController extends GetxController {
   late TextEditingController emailC;
   late TextEditingController passC;
+  RxBool isHide = true.obs;
 
    FirebaseAuth auth = FirebaseAuth.instance; //inisialisasi firebase auth
   FirebaseFirestore firestore = FirebaseFirestore.instance; //inisialiasaasi firestore
+
+
+  void hidepass(){
+    isHide.toggle();
+  }
 
   void login(String email, String pass) async {
     if (emailC.text.isEmpty || passC.text.isEmpty) {
@@ -26,7 +32,7 @@ class LoginController extends GetxController {
       }
       Get.defaultDialog( //ini ada user tapi emailnya belum terverifikasi
         title: 'Verifikasi Email',
-        middleText: 'Email Belum Terverifikasi, Silahkan Cek Email Anda',
+        middleText: 'Email Belum Terverifikasi, Silahkan Cek Email $email',
         onConfirm: ()  {
           userCredential.user!.sendEmailVerification(); //kirim email verifikasi ke email
           Get.back(); //tutup dialog

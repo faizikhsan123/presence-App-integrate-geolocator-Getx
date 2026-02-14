@@ -48,7 +48,7 @@ class AddPegawaiController extends GetxController {
 
           Get.defaultDialog(
             title: 'Success',
-            middleText: 'Pegawai Berhasil Ditambahkan dan jangan Lupa Verifikasi EmailNya',
+            middleText: 'Pegawai Berhasil Ditambahkan dan kami sudah mengirimkan verifikasi ke email $email',
             onConfirm: () {
               Get.back();
               Get.back();
