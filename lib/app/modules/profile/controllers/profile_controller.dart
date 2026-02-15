@@ -1,23 +1,22 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:get/get.dart';
+import 'package:presense_app/app/routes/app_pages.dart';
 
 class ProfileController extends GetxController {
-  //TODO: Implement ProfileController
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
+  FirebaseAuth auth = FirebaseAuth.instance;
 
-  final count = 0.obs;
-  @override
-  void onInit() {
-    super.onInit();
+  
+  Stream<DocumentSnapshot<Map<String, dynamic>>> profileStream()  { //stream
+    String uid =  auth.currentUser!.uid; //ambil uid yg login
+    return firestore.collection("pegawai").doc(uid).snapshots(); //ambil dari collection chats dan document uid yg sedang login
+
   }
 
-  @override
-  void onReady() {
-    super.onReady();
+  void logout() async { //fungsi logfout
+    await auth.signOut();
+    Get.offAllNamed(Routes.LOGIN);
   }
-
-  @override
-  void onClose() {
-    super.onClose();
-  }
-
-  void increment() => count.value++;
 }
