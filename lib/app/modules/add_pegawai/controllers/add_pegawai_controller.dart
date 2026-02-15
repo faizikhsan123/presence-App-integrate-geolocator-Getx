@@ -54,7 +54,8 @@ class AddPegawaiController extends GetxController {
                 }
               },
               child:
-                  isLoadingAddPegawai.value == false //ketika add pegawai isLoadingAddPegawai nilainya false
+                  isLoadingAddPegawai.value ==
+                      false //ketika add pegawai isLoadingAddPegawai nilainya false
                   ? Text("Add Pegawai")
                   : Text("Loading..."),
             ),
@@ -116,6 +117,7 @@ class AddPegawaiController extends GetxController {
           'email': emailC.text,
           'pass': passC.text,
           'uid': uid,
+          "role" : "pegawai", //tamabhakan role pegawai tiap nambah pegawai
           'createdAt': DateTime.now().toIso8601String(),
         });
 
