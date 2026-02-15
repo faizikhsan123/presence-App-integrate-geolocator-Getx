@@ -22,31 +22,27 @@ class ProfileView extends GetView<ProfileController> {
           }
 
           if (asyncSnapshot.connectionState == ConnectionState.active) {
-            var data = asyncSnapshot.data!.data(); //ambil data (ini pasti snpahot uda punnya datanya)
+            var data = asyncSnapshot.data!.data(); //data snapshot
             print(data);
 
             if (data == null) {
               return const Center(child: Text("Data profile tidak ditemukan"));
             }
 
-            // Avatar otomatis berdasarkan nama
-            //ini dari web https://ui-avatars.com/
             String imageUrl = "https://ui-avatars.com/api/?name=${data['nama']}&background=random&size=256";
 
             return SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  // Avatar dari HTTPS berdasarkan nama
                   CircleAvatar(
                     radius: 55,
                     backgroundColor: Colors.grey.shade200,
-                    backgroundImage: NetworkImage(imageUrl), //gambar dari imageurl ditas
+                    backgroundImage: NetworkImage(imageUrl),
                   ),
 
                   const SizedBox(height: 16),
 
-                  // Nama
                   Text(
                     data['nama'],
                     style: const TextStyle(
@@ -57,7 +53,6 @@ class ProfileView extends GetView<ProfileController> {
 
                   const SizedBox(height: 24),
 
-                  // Card informasi
                   Card(
                     elevation: 4,
                     shape: RoundedRectangleBorder(
@@ -82,12 +77,12 @@ class ProfileView extends GetView<ProfileController> {
 
                   const SizedBox(height: 30),
 
-                  // Update Profile
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       onPressed: () {
-                        // TODO: Aksi update profile
+                        //ke halaman update dan kirim data dari streamnya profile (snapshot)
+                        Get.toNamed(Routes.UPDATE_PROFILE,arguments: data);
                       },
                       icon: const Icon(Icons.edit),
                       label: const Text("Update Profile"),
@@ -99,7 +94,6 @@ class ProfileView extends GetView<ProfileController> {
 
                   const SizedBox(height: 12),
 
-                  // Update Password
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
@@ -116,7 +110,6 @@ class ProfileView extends GetView<ProfileController> {
 
                   const SizedBox(height: 12),
 
-                  // Logout
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
@@ -129,8 +122,12 @@ class ProfileView extends GetView<ProfileController> {
                         style: TextStyle(color: Colors.white),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            const Color.fromARGB(255, 111, 102, 102),
+                        backgroundColor: const Color.fromARGB(
+                          255,
+                          111,
+                          102,
+                          102,
+                        ),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
                     ),
