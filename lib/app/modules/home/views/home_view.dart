@@ -6,7 +6,6 @@ import 'package:presense_app/app/routes/app_pages.dart';
 import '../controllers/home_controller.dart';
 
 class HomeView extends GetView<HomeController> {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -16,20 +15,28 @@ class HomeView extends GetView<HomeController> {
         actions: [
           IconButton(
             icon: const Icon(Icons.person_outline),
-            onPressed: () =>Get.toNamed(Routes.ADD_PEGAWAI),
+            onPressed: () => Get.toNamed(Routes.ADD_PEGAWAI),
           ),
-          
         ],
       ),
       body: Center(
-        child: Text(
-          'HomeView is working',
-          style: TextStyle(fontSize: 20),
+        child: Text('HomeView is working', style: TextStyle(fontSize: 20)),
+      ),
+      floatingActionButton: Obx(
+        () => FloatingActionButton(
+          onPressed: () {
+            if (controller.isLoading.value == false) {
+              //jiak false maka dijlankan
+              controller.logout();
+            }
+          },
+          child: controller.isLoading.value == false
+              ? Icon(Icons.logout)
+              : Center(
+                child: CircularProgressIndicator(),
+              ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(onPressed: (){
-        controller.logout(); //logout
-      }, child: Icon(Icons.logout),),
     );
   }
 }

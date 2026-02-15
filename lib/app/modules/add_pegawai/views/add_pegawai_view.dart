@@ -32,13 +32,23 @@ class AddPegawaiView extends GetView<AddPegawaiController> {
             decoration: InputDecoration(labelText: "Password"),
           ),
           SizedBox(height: 20),
-          ElevatedButton(
-            child: Text("Simpan"),
-            onPressed: () => controller.addPegawai( //jalnkan fungsi
-              controller.namaC.text,
-              controller.nipC.text,
-              controller.emailC.text,
-              controller.passC.text,
+          Obx(
+            () => ElevatedButton(
+              onPressed: () {
+                if (controller.isLoading.value == false) {
+                  //hanya jalankan ketika isLoading false
+                  controller.addPegawai(
+                    //jalnkan fungsi
+                    controller.namaC.text,
+                    controller.nipC.text,
+                    controller.emailC.text,
+                    controller.passC.text,
+                  );
+                }
+              },
+              child: controller.isLoading.value == false
+                  ? Text("Add Pegawai")
+                  : Text("Loading..."),
             ),
           ),
         ],

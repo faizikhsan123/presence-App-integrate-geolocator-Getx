@@ -10,46 +10,51 @@ class LoginController extends GetxController {
   late TextEditingController passC;
   RxBool isHide = true.obs;
 
-   FirebaseAuth auth = FirebaseAuth.instance; //inisialisasi firebase auth
-  FirebaseFirestore firestore = FirebaseFirestore.instance; //inisialiasaasi firestore
+  FirebaseAuth auth = FirebaseAuth.instance;
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
 
+  RxBool isLoading = false.obs; //taambahkan ini
 
-  void hidepass(){
+  void hidepass() {
     isHide.toggle();
   }
 
-  void login(String email, String pass) async {
+  Future<void> login(String email, String pass) async {
+    isLoading.value = true; //ganri nilainya ketika function dijalankan
     if (emailC.text.isEmpty || passC.text.isEmpty) {
       Get.snackbar('Gagal', 'Email dan Password Tidak Boleh Kosong');
     }
     try {
-
-    UserCredential userCredential = await auth.signInWithEmailAndPassword(email: email, password: pass); //sekarang sign in atau login
-
-    if (userCredential.user != null) { //jjika ada user dan emailnya sudah terverifikasi ,ambil ke halaman home
-      if (userCredential.user!.emailVerified == true) { //email verified ini menandakan bahwa email sudah terverifikasi
-           Get.offNamed(Routes.HOME);
-          return;
-      }
-      Get.defaultDialog( //ini ada user tapi emailnya belum terverifikasi
-        title: 'Verifikasi Email',
-        middleText: 'Email Belum Terverifikasi, Silahkan Cek Email $email',
-        onConfirm: ()  {
-          userCredential.user!.sendEmailVerification(); //kirim email verifikasi ke email
-          Get.back(); //tutup dialog
-        },
+      UserCredential userCredential = await auth.signInWithEmailAndPassword(
+        email: email,
+        password: pass,
       );
-    } 
+
+      if (userCredential.user != null) {
+        if (userCredential.user!.emailVerified == true) {
+          isLoading.value = true; //ganti nilainya kalo ada user dan sudah verifikasi
+          Get.offNamed(Routes.HOME);
+          return;
+        }
+        Get.defaultDialog(
+          title: 'Verifikasi Email',
+          middleText: 'Email Belum Terverifikasi, Silahkan Cek Email $email',
+          onConfirm: () {
+            userCredential.user!.sendEmailVerification();
+            isLoading.value = false; //nilainya kemablai ke false kalo ada user dan belum verifikasi
+            Get.back();
+          },
+        );
+      }
     } catch (e) {
       print(e);
       Get.snackbar('Gagal', 'Email atau Password Salah');
-      
+      isLoading.value = false; //error maka nilainya kembali false
     }
   }
 
   @override
   void onInit() {
-    // TODO: implement onInit
     emailC = TextEditingController();
     passC = TextEditingController();
     super.onInit();
@@ -57,7 +62,6 @@ class LoginController extends GetxController {
 
   @override
   void onClose() {
-    // TODO: implement onClose
     emailC.dispose();
     passC.dispose();
     super.onClose();

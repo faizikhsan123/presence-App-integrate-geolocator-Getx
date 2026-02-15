@@ -29,21 +29,34 @@ class LoginView extends GetView<LoginController> {
                   onPressed: () {
                     controller.hidepass();
                   },
-                  icon: controller.isHide.value == false ? Icon(Icons.visibility) : Icon(Icons.visibility_off),
+                  icon: controller.isHide.value == false
+                      ? Icon(Icons.visibility)
+                      : Icon(Icons.visibility_off),
                 ),
               ),
             ),
           ),
           SizedBox(height: 20),
-          ElevatedButton(
-            child: Text("Login"),
-            onPressed: () =>
-                controller.login(controller.emailC.text, controller.passC.text),
+          Obx( //memantau 
+            () => ElevatedButton(
+              onPressed: () async {
+                if (controller.isLoading.value == false) {
+                  //jika is loadig false maka bisa dijalankan
+                  await controller.login(
+                    controller.emailC.text,
+                    controller.passC.text,
+                  );
+                }
+              },
+              child: controller.isLoading.value == false //jika is loading false maka ....
+                  ? Text("Login")
+                  : Text("Loafing"),
+            ),
           ),
+
           SizedBox(height: 20),
           TextButton(
             onPressed: () {
-              //tambahkan ini
               Get.toNamed(Routes.RESET);
             },
             child: Text("Lupa passweord"),

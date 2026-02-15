@@ -2,18 +2,20 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:presense_app/app/routes/app_pages.dart';
 
 class AddPegawaiController extends GetxController {
   late TextEditingController nipC;
   late TextEditingController namaC;
   late TextEditingController emailC;
   late TextEditingController passC;
-  late TextEditingController passAdmin; //textfield password admin (untuk validasi)
+  late TextEditingController passAdmin;
+  RxBool isLoading = false.obs; //tambahkan ini
+  RxBool isLoadingAddPegawai = false.obs; //tambahkan ini
 
   FirebaseAuth auth = FirebaseAuth.instance;
   FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  
   void addPegawai(String name, String nip, String email, String pass) async {
     if (nipC.text.isEmpty || namaC.text.isEmpty || emailC.text.isEmpty) {
       Get.snackbar(
@@ -23,11 +25,10 @@ class AddPegawaiController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
       );
     } else {
-      //jika tidak kosong
+      isLoading.value = true; //ketika add pegawai isLoading nilainya true
       Get.defaultDialog(
         title: 'Validasi admin',
         content: Column(
-          //content seperti middle textt namun dia make widget
           children: [
             TextField(
               controller: passAdmin,
@@ -37,42 +38,67 @@ class AddPegawaiController extends GetxController {
           ],
         ),
         actions: [
-          ElevatedButton(onPressed: () => Get.back(), child: Text("cancel")),
-          ElevatedButton(onPressed: () async {
-          await prosesAddPegawai(); //jalnkan function idbawah
-          }, child: Text("Add pegawai")),
+          ElevatedButton(
+            onPressed: () {
+              isLoading.value = false;
+              Get.back();
+            },
+            child: Text("cancel"),
+          ),
+          Obx(
+            () => ElevatedButton(
+              onPressed: () async {
+                if (isLoadingAddPegawai.value == false) {
+                  //ketika add pegawai isLoadingAddPegawai nilainya false
+                  await prosesAddPegawai();
+                }
+              },
+              child:
+                  isLoadingAddPegawai.value == false //ketika add pegawai isLoadingAddPegawai nilainya false
+                  ? Text("Add Pegawai")
+                  : Text("Loading..."),
+            ),
+          ),
         ],
       );
     }
   }
 
   Future prosesAddPegawai() async {
-    //function tambah pegawai kita pecah jadi
+    isLoading.value = true; //ketika add pegawai isLoading nilainya true
+    isLoadingAddPegawai.value = true;
+
     if (passAdmin.text.isEmpty) {
-      //jika password admin kosong validasi
       Get.snackbar(
         "Error",
         "Password wajib diisi untuk keperluan validasi",
         backgroundColor: Colors.red,
         snackPosition: SnackPosition.BOTTOM,
       );
-      return; //maka tidak bisa dijalankan koode berikutnya
+      isLoading.value = false;
+      isLoadingAddPegawai.value = false;
+      return;
     }
+
     try {
-      //jika dia bener admin maka bisa tambah pegawai
-      String emailAdmin = auth.currentUser!.email!; //ini email admin skearang
+      String emailAdmin = auth.currentUser!.email!;
 
-      //ambil admin credential emailnya dari email yg sedang login passwordnya diambil dari pass admin 
-      UserCredential adminCredential = await auth.signInWithEmailAndPassword(email: emailAdmin, password: passAdmin.text);
+      UserCredential adminCredential = await auth.signInWithEmailAndPassword(
+        email: emailAdmin,
+        password: passAdmin.text,
+      );
 
-      if (adminCredential.user == null) { //jika tidak ditemukan
-       Get.defaultDialog(
-        title: 'Error',
-        middleText: 'Password Admin Salah',
-        onConfirm: () => Get.back(),
-       );
+      if (adminCredential.user == null) {
+        Get.snackbar(
+          "Error",
+          "Password Salah",
+          backgroundColor: Colors.red,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        isLoading.value = false;
+        isLoadingAddPegawai.value = false;
+        return;
       }
-
 
       UserCredential userCredential = await auth.createUserWithEmailAndPassword(
         email: emailC.text,
@@ -95,25 +121,31 @@ class AddPegawaiController extends GetxController {
 
         await userCredential.user!.sendEmailVerification();
 
-        await auth.signOut(); //jadi pas nambah pegawai current usernya = null kita logout
+        await auth.signOut();
 
-        UserCredential adminCredential = await auth.signInWithEmailAndPassword(email: emailAdmin, password: passAdmin.text); //trs di reloginnd dengangan akun admin
+        UserCredential adminCredential = await auth.signInWithEmailAndPassword(
+          email: emailAdmin,
+          password: passAdmin.text,
+        );
+
+        isLoading.value = false;
+        isLoadingAddPegawai.value = false;
 
         Get.defaultDialog(
           title: 'Success',
           middleText:
               'Pegawai Berhasil Ditambahkan dan kami sudah mengirimkan verifikasi ke email',
           onConfirm: () {
-            Get.back();
-            Get.back();
+            Get.offAllNamed(Routes.HOME);
           },
         );
       }
     } catch (e) {
       print(e);
+      isLoading.value = false;
+      isLoadingAddPegawai.value = false;
     }
   }
-
 
   void onInit() {
     nipC = TextEditingController();

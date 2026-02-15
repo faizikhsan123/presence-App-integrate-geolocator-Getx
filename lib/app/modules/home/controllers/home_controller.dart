@@ -4,8 +4,10 @@ import 'package:presense_app/app/routes/app_pages.dart';
 
 class HomeController extends GetxController {
   FirebaseAuth auth = FirebaseAuth.instance;
+  RxBool isLoading = false.obs; //tambahkan isLoading
  
-  void logout() async {
+  Future logout() async {
+    isLoading.value = true; //ketika logout isLoading nilainya true
     await auth.signOut();
     Get.offAllNamed(Routes.LOGIN);
   }
