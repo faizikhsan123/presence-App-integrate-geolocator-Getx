@@ -29,7 +29,8 @@ class ProfileView extends GetView<ProfileController> {
               return const Center(child: Text("Data profile tidak ditemukan"));
             }
 
-            String imageUrl = "https://ui-avatars.com/api/?name=${data['nama']}&background=random&size=256";
+            String imageUrl =
+                "https://ui-avatars.com/api/?name=${data['nama']}&background=random&size=256";
 
             return SingleChildScrollView(
               padding: const EdgeInsets.all(16),
@@ -38,7 +39,9 @@ class ProfileView extends GetView<ProfileController> {
                   CircleAvatar(
                     radius: 55,
                     backgroundColor: Colors.grey.shade200,
-                    backgroundImage: NetworkImage(imageUrl),
+                    backgroundImage: data['photo'] == null //kalo dia null tampilkan defaulat gambar
+                        ? NetworkImage(imageUrl)
+                        : NetworkImage(data['photo']),
                   ),
 
                   const SizedBox(height: 16),
@@ -82,7 +85,7 @@ class ProfileView extends GetView<ProfileController> {
                     child: ElevatedButton.icon(
                       onPressed: () {
                         //ke halaman update dan kirim data dari streamnya profile (snapshot)
-                        Get.toNamed(Routes.UPDATE_PROFILE,arguments: data);
+                        Get.toNamed(Routes.UPDATE_PROFILE, arguments: data);
                       },
                       icon: const Icon(Icons.edit),
                       label: const Text("Update Profile"),

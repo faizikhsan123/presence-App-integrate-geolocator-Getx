@@ -1,4 +1,4 @@
-import 'dart:math';
+import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -6,41 +6,110 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http; //import http
 
 class UpdateProfileController extends GetxController {
   late TextEditingController nipC;
   late TextEditingController namaC;
   late TextEditingController emailC;
-  late ImagePicker imagePicker = ImagePicker(); //import image picker
+  late ImagePicker imagePicker = ImagePicker();
+  RxBool isLoading = false.obs;
+  RxBool uploadButton = false.obs;
 
-  XFile? pickedImage; //untuk menampung gambar
+  FirebaseAuth auth = FirebaseAuth.instance;
 
-  void selectImage() async {
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+  XFile? pickedImage;
+
+  String? imageUrl; //untuk menampung url gambar
+
+  Future<void> selectImage() async {
     try {
       final image = await imagePicker.pickImage(source: ImageSource.gallery);
       if (image != null) {
-        //ketika user memilih gambar 
         pickedImage = image;
-      
       }
-      update(); //untuk memperbarui karena pakai get buildeedr
-    } catch (e) { //kalo user klik cancel pada pemilihan gamabar
+      update();
+    } catch (e) {
       print(e);
       pickedImage = null;
       update();
     }
   }
 
-  void deleteImage(){
+  void deleteImage() {
     pickedImage = null;
     update();
   }
 
-  RxBool isLoading = false.obs;
+  //upload image to cloudinary
+  void uploadImage() async {
+    if (pickedImage == null) {
+      //jika tidak ada gambar yang dipilih
+      Get.snackbar(
+        "Error",
+        "Gambar Harus dipilih",
+        backgroundColor: Colors.red,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
 
-  FirebaseAuth auth = FirebaseAuth.instance;
+    try {
+      uploadButton.value = true;
 
-  FirebaseFirestore firestore = FirebaseFirestore.instance;
+      String? uid = auth.currentUser!.uid; //uid user yang login
+
+      String cloudName = 'dvjnnntun'; //cloudnamenya
+      String uploadPreset = 'absensi'; //nama presetnya
+
+      var url = Uri.parse(
+        'https://api.cloudinary.com/v1_1/$cloudName/image/upload',
+      ); //url api cloudinary
+
+      var request = http.MultipartRequest(
+        'POST',
+        url,
+      ); //membuat request dengan method POST (untuk upload gambar)
+
+      request.fields['upload_preset'] =
+          uploadPreset; //menambahkan field upload_preset
+      request.files.add(
+        await http.MultipartFile.fromPath('file', pickedImage!.path),
+      ); //menambahkan file yang akan diupload
+
+      var response = await request.send(); //mengirim request
+      var resData = await response.stream.toBytes(); //mengambil data response (ini bentuk binary)
+      var result = jsonDecode(String.fromCharCodes(resData),); //mengubah data menjadi string
+
+      imageUrl = result['secure_url']; //ambil url gambar
+
+      await firestore.collection("pegawai").doc(uid).update({
+        //update yg ada di collection pegawai
+        "photo": imageUrl,
+      });
+
+      Get.snackbar(
+        'Berhasil',
+        'Gambar berhasil diupload',
+        backgroundColor: Colors.green,
+
+        
+      );
+
+      uploadButton.value = false; //klo uda selsai update kembalikan ke false
+    } catch (e) {
+      uploadButton.value = false;
+      print(e);
+      Get.snackbar(
+        "Error",
+        "Gambar gagal diupload",
+        backgroundColor: Colors.red,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
+  }
 
   Future<void> updateProfile(String email, String nip, String nama) async {
     isLoading.value = true;

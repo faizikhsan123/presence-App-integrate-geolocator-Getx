@@ -41,9 +41,8 @@ class UpdateProfileView extends GetView<UpdateProfileController> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                GetBuilder<UpdateProfileController>(
-                    //get buildedr ini memperbarui tampilan seperti obx namun karena XFile tidak ada rx (tidak bisa di obs) maka pakai GetBuilder. dan mharus dikasi tipe controller
-                    builder: (controller) => controller.pickedImage != null //jika ada gmabar yg dipilih
+                  GetBuilder<UpdateProfileController>(
+                    builder: (controller) => controller.pickedImage != null
                         ? Column(
                             children: [
                               Container(
@@ -68,14 +67,12 @@ class UpdateProfileView extends GetView<UpdateProfileController> {
                                           100,
                                         ),
                                         child: Image.file(
-                                         // image file menampilkan gambar dari file memalui path gambar yg dipilih
                                           File(controller.pickedImage!.path),
                                           fit: BoxFit.cover,
-                                        )
+                                        ),
                                       ),
                                     ),
                                     Positioned(
-                                      //widget position untuk atur poisi dari parent seccara manual
                                       top: 0,
                                       right: 0,
                                       child: Container(
@@ -85,8 +82,7 @@ class UpdateProfileView extends GetView<UpdateProfileController> {
                                         ),
                                         child: IconButton(
                                           onPressed: () {
-                                            controller
-                                                .deleteImage(); //untuk menghapus gambar
+                                            controller.deleteImage();
                                           },
                                           icon: Icon(
                                             Icons.delete,
@@ -96,22 +92,42 @@ class UpdateProfileView extends GetView<UpdateProfileController> {
                                         ),
                                       ),
                                     ),
-                                    // tombol upload dipindah ke bawah biar tidak nutup gambar
+
                                     Positioned(
                                       bottom: 0,
                                       left: 0,
                                       right: 0,
                                       child: Container(
-                                        color: Colors.black45,
+                                        color: const Color.fromARGB(
+                                          115,
+                                          212,
+                                          199,
+                                          199,
+                                        ),
                                         height: 30,
                                         child: TextButton(
-                                          onPressed: () {},
-                                          child: FittedBox(
-                                            child: Text(
-                                              "upload Image",
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                              ),
+                                          onPressed: () {
+                                            controller.uploadImage();
+                                          },
+                                          child: Obx(
+                                            () => FittedBox(
+                                              child:
+                                                  controller
+                                                          .uploadButton
+                                                          .value ==
+                                                      false
+                                                  ? Text(
+                                                      "upload Image",
+                                                      style: TextStyle(
+                                                        color: Colors.white,
+                                                      ),
+                                                    )
+                                                  : Text(
+                                                      "Loading...",
+                                                      style: TextStyle(
+                                                        color: Colors.white,
+                                                      ),
+                                                    ),
                                             ),
                                           ),
                                         ),
@@ -124,10 +140,13 @@ class UpdateProfileView extends GetView<UpdateProfileController> {
                           )
                         : Text("No Image Selected"),
                   ),
-                
-                  TextButton(onPressed: () {
-                    controller.selectImage(); //untuk memilih gambar
-                  }, child: Text("Pilih File")),
+
+                  TextButton(
+                    onPressed: () {
+                      controller.selectImage();
+                    },
+                    child: Text("Pilih File"),
+                  ),
                 ],
               ),
             ],
