@@ -1,13 +1,40 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class UpdateProfileController extends GetxController {
   late TextEditingController nipC;
   late TextEditingController namaC;
   late TextEditingController emailC;
+  late ImagePicker imagePicker = ImagePicker(); //import image picker
+
+  XFile? pickedImage; //untuk menampung gambar
+
+  void selectImage() async {
+    try {
+      final image = await imagePicker.pickImage(source: ImageSource.gallery);
+      if (image != null) {
+        //ketika user memilih gambar 
+        pickedImage = image;
+      
+      }
+      update(); //untuk memperbarui karena pakai get buildeedr
+    } catch (e) { //kalo user klik cancel pada pemilihan gamabar
+      print(e);
+      pickedImage = null;
+      update();
+    }
+  }
+
+  void deleteImage(){
+    pickedImage = null;
+    update();
+  }
 
   RxBool isLoading = false.obs;
 
@@ -30,12 +57,9 @@ class UpdateProfileController extends GetxController {
     }
     try {
       isLoading.value = true;
-      String uid = auth.currentUser!.uid; //ambil uid yg login
+      String uid = auth.currentUser!.uid;
       CollectionReference pegawai = firestore.collection('pegawai');
-      await pegawai.doc(uid).update({
-        //update data collection pegawai yg doc nya itu uid yg sekarang
-        'nama': nama,
-      });
+      await pegawai.doc(uid).update({'nama': nama});
 
       Get.defaultDialog(
         title: 'Berhasil',
