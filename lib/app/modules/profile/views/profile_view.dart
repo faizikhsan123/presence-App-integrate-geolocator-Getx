@@ -8,8 +8,9 @@ import 'package:presense_app/app/routes/app_pages.dart';
 import '../controllers/profile_controller.dart';
 
 class ProfileView extends GetView<ProfileController> {
+   final pageC = Get.find<PageIndexController>(); //import controller
   @override
-  final pageC = Get.find<PageIndexController>(); //import controller
+ 
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(

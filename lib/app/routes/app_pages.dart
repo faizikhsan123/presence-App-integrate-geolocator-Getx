@@ -2,6 +2,8 @@ import 'package:get/get.dart';
 
 import '../modules/add_pegawai/bindings/add_pegawai_binding.dart';
 import '../modules/add_pegawai/views/add_pegawai_view.dart';
+import '../modules/detail_presensi/bindings/detail_presensi_binding.dart';
+import '../modules/detail_presensi/views/detail_presensi_view.dart';
 import '../modules/home/bindings/home_binding.dart';
 import '../modules/home/views/home_view.dart';
 import '../modules/login/bindings/login_binding.dart';
@@ -22,11 +24,11 @@ class AppPages {
 
   static final routes = [
     GetPage(
-      name: _Paths.HOME,
-      page: () => HomeView(),
-      binding: HomeBinding(),
-      transition: Transition.fadeIn //animasi ketika pindah halaman ke home
-    ),
+        name: _Paths.HOME,
+        page: () => HomeView(),
+        binding: HomeBinding(),
+        transition: Transition.fadeIn //animasi ketika pindah halaman ke home
+        ),
     GetPage(
       name: _Paths.ADD_PEGAWAI,
       page: () => AddPegawaiView(),
@@ -43,15 +45,20 @@ class AppPages {
       binding: ResetBinding(),
     ),
     GetPage(
-      name: _Paths.PROFILE,
-      page: () => ProfileView(),
-      binding: ProfileBinding(),
-      transition: Transition.fadeIn //animasi ketika pindah halaman ke profile
-    ),
+        name: _Paths.PROFILE,
+        page: () => ProfileView(),
+        binding: ProfileBinding(),
+        transition: Transition.fadeIn //animasi ketika pindah halaman ke profile
+        ),
     GetPage(
       name: _Paths.UPDATE_PROFILE,
-      page: () =>  UpdateProfileView(),
+      page: () => UpdateProfileView(),
       binding: UpdateProfileBinding(),
+    ),
+    GetPage(
+      name: _Paths.DETAIL_PRESENSI,
+      page: () => const DetailPresensiView(),
+      binding: DetailPresensiBinding(),
     ),
   ];
 }

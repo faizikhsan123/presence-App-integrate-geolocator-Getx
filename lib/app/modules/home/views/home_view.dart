@@ -3,12 +3,13 @@ import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:presense_app/app/controllers/page_index_controller.dart';
 import 'package:presense_app/app/routes/app_pages.dart';
 
 import '../controllers/home_controller.dart';
 
-final pageC = Get.find<PageIndexController>(); //import controller
+final pageC = Get.find<PageIndexController>();
 
 class HomeView extends GetView<HomeController> {
   @override
@@ -17,12 +18,6 @@ class HomeView extends GetView<HomeController> {
       appBar: AppBar(
         title: const Text('HomeView'),
         centerTitle: true,
-        leading: IconButton(
-          onPressed: () {
-            Get.toNamed(Routes.PROFILE);
-          },
-          icon: Icon(Icons.person),
-        ),
         actions: [
           StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
             stream: controller.roleStream(),
@@ -31,6 +26,7 @@ class HomeView extends GetView<HomeController> {
                 return SizedBox();
               } else if (asyncSnapshot.connectionState ==
                   ConnectionState.active) {
+                  
                 String role = asyncSnapshot.data!.data()!['role'];
                 if (role == "admin") {
                   return IconButton(
@@ -47,21 +43,162 @@ class HomeView extends GetView<HomeController> {
           ),
         ],
       ),
-      body: Center(
-        child: Text('HomeView is working', style: TextStyle(fontSize: 20)),
+      body:  StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>( //kita stream 
+        stream: controller.roleStream(), //pakai stream role  
+        builder: (context, asyncSnapshot) {
+          if (asyncSnapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
+          var data = asyncSnapshot.data!.data(); //ambil data
+           String imageUrl ="https://ui-avatars.com/api/?name=${data!['nama']}&background=random&size=256"; //default gambar kalo photo null
+          return ListView(
+            padding: EdgeInsets.all(20),
+            children: [
+              Row(
+                children: [
+                  ClipOval(
+                    child: Container(
+                      width: 75,
+                      height: 75,
+                      color: Colors.grey[200],
+                      child: Center(child:   CircleAvatar(
+                        radius: 55,
+                        backgroundImage: data['photo'] == null //jika gambar null
+                            ? NetworkImage(imageUrl)
+                            : NetworkImage(data['photo']),
+                      ),),
+                    ),
+                  ),
+                  SizedBox(width: 10),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Welcome",
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                      Text("Jalan raya Medan"),
+                    ],
+                  ),
+                ],
+              ),
+              SizedBox(height: 20),
+              Container(
+                padding: EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: Colors.grey[200],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+          
+                  children: [
+                    Text(
+                      "${data['job']}", //ambil job
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: 20),
+                    Text(
+                      "${data['nip']}", //ambil nip
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
+                    ), //ambil nama
+                    Text("${data['nama']}", style: TextStyle(fontSize: 18)),
+                  ],
+                ),
+              ),
+              SizedBox(height: 20),
+              Container(
+                padding: EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: Colors.grey[200],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Column(children: [Text("Masuk"), Text("-")]),
+                    Container(
+                      width: 2,
+                      height: 40,
+                      color: const Color.fromARGB(255, 133, 126, 103),
+                    ),
+                    Column(children: [Text("Masuk"), Text("-")]),
+                  ],
+                ),
+              ),
+              SizedBox(height: 10),
+              Divider(
+                //widgett untuk membuat garis
+                thickness: 2, //mengatur ketebalan garis
+                color: Colors.amber,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Last 5 Days",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                  ),
+                  TextButton(onPressed: () {}, child: Text("see more")),
+                ],
+              ),
+              SizedBox(height: 10),
+              ListView.builder(
+                shrinkWrap:
+                    true, //karena kita buat 2 widget scroll view maka menggunakan shrinkwrap agar tidak terjadi error (nonaktifkan scrollview)
+                physics: NeverScrollableScrollPhysics(), //jika memkai shrtinkwrap ttrue
+                itemCount: 5,
+                itemBuilder: (context, index) {
+                  return Container(
+                    padding: EdgeInsets.all(20),
+                    margin: EdgeInsets.only(bottom: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Masuk",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            Text(
+                              "${DateFormat.yMMMEd().format(DateTime.now())}",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+          
+                        Text("waktu ${DateFormat.jms().format(DateTime.now())}"),
+                        SizedBox(height: 10),
+                        Text(
+                          "keluar",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        Text("waktu ${DateFormat.jms().format(DateTime.now())}"),
+                      ],
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  );
+                },
+              ),
+            ],
+          );
+        }
       ),
-     bottomNavigationBar: Obx(
+      bottomNavigationBar: Obx(
         () => ConvexAppBar(
-          //widget bottom navbar
-          style: TabStyle.fixed, //style bottom navbar
-          initialActiveIndex: pageC.currentIndex.value, //index active
+          style: TabStyle.fixed,
+          initialActiveIndex: pageC.currentIndex.value,
           items: [
             TabItem(icon: Icons.home, title: 'Home'),
             TabItem(icon: Icons.fingerprint, title: 'Add'),
             TabItem(icon: Icons.person, title: 'Pofile'),
           ],
           onTap: (index) {
-            //function ketika di klik sesuai index
             pageC.changePage(index);
           },
         ),

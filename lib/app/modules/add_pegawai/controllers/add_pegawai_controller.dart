@@ -7,6 +7,7 @@ import 'package:presense_app/app/routes/app_pages.dart';
 class AddPegawaiController extends GetxController {
   late TextEditingController nipC;
   late TextEditingController namaC;
+  late TextEditingController jobC;
   late TextEditingController emailC;
   late TextEditingController passC;
   late TextEditingController passAdmin;
@@ -17,15 +18,15 @@ class AddPegawaiController extends GetxController {
   FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   void addPegawai(String name, String nip, String email, String pass) async {
-    if (nipC.text.isEmpty || namaC.text.isEmpty || emailC.text.isEmpty) {
+    if (nipC.text.isEmpty || namaC.text.isEmpty || emailC.text.isEmpty || jobC.text.isEmpty) { //+validasi
       Get.snackbar(
         "Error",
-        "nip, nama, email Tidak Boleh Kosong",
+        "nip, nama,job dan email Tidak Boleh Kosong",
         backgroundColor: Colors.red,
         snackPosition: SnackPosition.BOTTOM,
       );
     } else {
-      isLoading.value = true; //ketika add pegawai isLoading nilainya true
+      isLoading.value = true; 
       Get.defaultDialog(
         title: 'Validasi admin',
         content: Column(
@@ -114,10 +115,12 @@ class AddPegawaiController extends GetxController {
         await pegawai.doc(uid).set({
           'nip': nipC.text,
           'nama': namaC.text,
+          "job" : jobC.text, //tambah ini
           'email': emailC.text,
           'pass': passC.text,
           'uid': uid,
-          "role" : "pegawai", //tamabhakan role pegawai tiap nambah pegawai
+          "photo": null,
+          "role" : "pegawai", 
           'createdAt': DateTime.now().toIso8601String(),
         });
 
@@ -152,6 +155,7 @@ class AddPegawaiController extends GetxController {
   void onInit() {
     nipC = TextEditingController();
     namaC = TextEditingController();
+    jobC = TextEditingController();
     emailC = TextEditingController();
     passC = TextEditingController();
     passAdmin = TextEditingController();
@@ -162,6 +166,7 @@ class AddPegawaiController extends GetxController {
   void onClose() {
     nipC.dispose();
     namaC.dispose();
+    jobC.dispose();
     emailC.dispose();
     passC.dispose();
     passAdmin.dispose();
