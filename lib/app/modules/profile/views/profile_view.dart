@@ -1,12 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:presense_app/app/controllers/page_index_controller.dart';
 import 'package:presense_app/app/routes/app_pages.dart';
 
 import '../controllers/profile_controller.dart';
 
 class ProfileView extends GetView<ProfileController> {
   @override
+  final pageC = Get.find<PageIndexController>(); //import controller
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -46,9 +49,9 @@ class ProfileView extends GetView<ProfileController> {
                       ),
 
                       Positioned(
-                        //hanya bisa dipaaki di stack
-                        top: -10, // negatif agar keluar dari lingkaran
-                        right: -10, // keluar ke kanan
+                       
+                        top: -10, 
+                        right: -10, 
                         child: data['photo'] == null
                             ? Container()
                             : IconButton(
@@ -162,6 +165,22 @@ class ProfileView extends GetView<ProfileController> {
 
           return const Center(child: CircularProgressIndicator());
         },
+      ),
+      bottomNavigationBar: Obx(
+        () => ConvexAppBar(
+          //widget bottom navbar
+          style: TabStyle.fixed, //style bottom navbar
+          initialActiveIndex: pageC.currentIndex.value, //index active
+          items: [
+            TabItem(icon: Icons.home, title: 'Home'),
+            TabItem(icon: Icons.fingerprint, title: 'Add'),
+            TabItem(icon: Icons.person, title: 'Profile'),
+          ],
+          onTap: (index) {
+            //function ketika di klik sesuai index
+            pageC.changePage(index);
+          },
+        ),
       ),
     );
   }
