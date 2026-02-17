@@ -22,7 +22,7 @@ class ProfileView extends GetView<ProfileController> {
           }
 
           if (asyncSnapshot.connectionState == ConnectionState.active) {
-            var data = asyncSnapshot.data!.data(); //data snapshot
+            var data = asyncSnapshot.data!.data();
             print(data);
 
             if (data == null) {
@@ -36,12 +36,33 @@ class ProfileView extends GetView<ProfileController> {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  CircleAvatar(
-                    radius: 55,
-                    backgroundColor: Colors.grey.shade200,
-                    backgroundImage: data['photo'] == null //kalo dia null tampilkan defaulat gambar
-                        ? NetworkImage(imageUrl)
-                        : NetworkImage(data['photo']),
+                  Stack(
+                    children: [
+                      CircleAvatar(
+                        radius: 55,
+                        backgroundImage: data['photo'] == null
+                            ? NetworkImage(imageUrl)
+                            : NetworkImage(data['photo']),
+                      ),
+
+                      Positioned(
+                        //hanya bisa dipaaki di stack
+                        top: -10, // negatif agar keluar dari lingkaran
+                        right: -10, // keluar ke kanan
+                        child: data['photo'] == null
+                            ? Container()
+                            : IconButton(
+                                onPressed: () {
+                                  controller.deletePhoto();
+                                },
+                                icon: Icon(
+                                  Icons.delete_forever,
+                                  color: Colors.red,
+                                  size: 25,
+                                ),
+                              ),
+                      ),
+                    ],
                   ),
 
                   const SizedBox(height: 16),
@@ -84,7 +105,6 @@ class ProfileView extends GetView<ProfileController> {
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       onPressed: () {
-                        //ke halaman update dan kirim data dari streamnya profile (snapshot)
                         Get.toNamed(Routes.UPDATE_PROFILE, arguments: data);
                       },
                       icon: const Icon(Icons.edit),

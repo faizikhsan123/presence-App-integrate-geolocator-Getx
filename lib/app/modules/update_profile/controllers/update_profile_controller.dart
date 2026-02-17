@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:http/http.dart' as http; //import http
+import 'package:http/http.dart' as http;
 
 class UpdateProfileController extends GetxController {
   late TextEditingController nipC;
@@ -22,7 +22,7 @@ class UpdateProfileController extends GetxController {
 
   XFile? pickedImage;
 
-  String? imageUrl; //untuk menampung url gambar
+  String? imageUrl;
 
   Future<void> selectImage() async {
     try {
@@ -43,10 +43,12 @@ class UpdateProfileController extends GetxController {
     update();
   }
 
-  //upload image to cloudinary
+  
+
+
   void uploadImage() async {
     if (pickedImage == null) {
-      //jika tidak ada gambar yang dipilih
+
       Get.snackbar(
         "Error",
         "Gambar Harus dipilih",
@@ -59,34 +61,34 @@ class UpdateProfileController extends GetxController {
     try {
       uploadButton.value = true;
 
-      String? uid = auth.currentUser!.uid; //uid user yang login
+      String? uid = auth.currentUser!.uid; 
 
-      String cloudName = 'dvjnnntun'; //cloudnamenya
-      String uploadPreset = 'absensi'; //nama presetnya
+      String cloudName = 'dvjnnntun'; 
+      String uploadPreset = 'absensi'; 
 
       var url = Uri.parse(
         'https://api.cloudinary.com/v1_1/$cloudName/image/upload',
-      ); //url api cloudinary
+      );
 
       var request = http.MultipartRequest(
         'POST',
         url,
-      ); //membuat request dengan method POST (untuk upload gambar)
+      ); 
 
       request.fields['upload_preset'] =
-          uploadPreset; //menambahkan field upload_preset
+          uploadPreset; 
       request.files.add(
         await http.MultipartFile.fromPath('file', pickedImage!.path),
-      ); //menambahkan file yang akan diupload
+      ); 
 
-      var response = await request.send(); //mengirim request
-      var resData = await response.stream.toBytes(); //mengambil data response (ini bentuk binary)
-      var result = jsonDecode(String.fromCharCodes(resData),); //mengubah data menjadi string
+      var response = await request.send(); 
+      var resData = await response.stream.toBytes(); 
+      var result = jsonDecode(String.fromCharCodes(resData),); 
 
-      imageUrl = result['secure_url']; //ambil url gambar
+      imageUrl = result['secure_url']; 
 
       await firestore.collection("pegawai").doc(uid).update({
-        //update yg ada di collection pegawai
+       
         "photo": imageUrl,
       });
 
@@ -98,7 +100,7 @@ class UpdateProfileController extends GetxController {
         
       );
 
-      uploadButton.value = false; //klo uda selsai update kembalikan ke false
+      uploadButton.value = false; 
     } catch (e) {
       uploadButton.value = false;
       print(e);

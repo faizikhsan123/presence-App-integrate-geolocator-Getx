@@ -15,27 +15,34 @@ void main() async {
 }
 
 class Myapp extends StatelessWidget {
-
-   FirebaseAuth auth = FirebaseAuth.instance;
+  FirebaseAuth auth = FirebaseAuth.instance;
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<User?>(
-      stream: auth.authStateChanges(), //cek apakah ada user atau tidak ini juga bisa menyiman auth yg login
-      //namun ini juga bisa misal ketika dia buat akun baru maka current user akan berubah bukan user yg sudah login sebelumnya
+      stream: auth.authStateChanges(),
       builder: (context, asyncSnapshot) {
-        print(asyncSnapshot.data); //melihat ada ga datannya di terminal
-      
+        print(asyncSnapshot.data);
+
         if (asyncSnapshot.connectionState == ConnectionState.waiting) {
-          return CircularProgressIndicator();
+          return const MaterialApp(
+            home: Scaffold(
+              body: Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+          );
         }
+
         return GetMaterialApp(
+          key: Get.key, // tambahkan ini
           debugShowCheckedModeBanner: false,
           title: "Application",
-          initialRoute: asyncSnapshot.data == null ? Routes.LOGIN : Routes.HOME, //jika tidak ada user maka langsung ke halaman login //jika ada user langsung ke halaman home
+          initialRoute:
+              asyncSnapshot.data == null ? Routes.LOGIN : Routes.HOME,
           getPages: AppPages.routes,
         );
-      }
+      },
     );
   }
 }
