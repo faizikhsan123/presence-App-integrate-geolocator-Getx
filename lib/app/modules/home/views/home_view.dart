@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 import 'package:flutter/material.dart';
@@ -51,6 +53,12 @@ class HomeView extends GetView<HomeController> {
           var data = asyncSnapshot.data!.data();
           String imageUrl =
               "https://ui-avatars.com/api/?name=${data!['nama']}&background=random&size=256";
+
+          //ubah bentuk mapping ke string (field position) 
+          Map<String,dynamic> posisi = data['position'];
+          String lokasi = posisi['latitude'].toString() + "," + posisi['longitude'].toString();
+
+
           return ListView(
             padding: EdgeInsets.all(20),
             children: [
@@ -82,7 +90,7 @@ class HomeView extends GetView<HomeController> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Text("Jalan raya Medan"),
+                      Text("${data['position'] == null ? "" : lokasi}", style: TextStyle(fontSize: 18)), //ambil lokasi
                     ],
                   ),
                 ],

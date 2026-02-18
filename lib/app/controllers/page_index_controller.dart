@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import 'package:presense_app/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
@@ -5,6 +7,9 @@ import 'package:geolocator/geolocator.dart'; //import library geolocator
 
 class PageIndexController extends GetxController {
   RxInt currentIndex = 0.obs;
+
+  FirebaseAuth auth = FirebaseAuth.instance; //untuk akses firebase auth
+  FirebaseFirestore firestore = FirebaseFirestore.instance; //untuk akses firestore
 
   void changePage(index) async {
     switch (index) {
@@ -14,6 +19,7 @@ class PageIndexController extends GetxController {
         Map<String, dynamic> dataResponse = await posisiTerkini();
         if (dataResponse["error"] == false) { //jika data responose mapping key error false
         Position position = dataResponse["position"]; //ambil key position dari mapping dibawah
+        await updatePosisi(position); //dan panggil function updatePosisidibawah  dan kirim parameter position
         Get.snackbar('${dataResponse["message"]}', "posisi anda ${position.latitude}, ${position.longitude}");
         
         }else { //jika data responose mapping key error true
@@ -35,6 +41,17 @@ class PageIndexController extends GetxController {
         currentIndex.value = index;
         Get.offAllNamed(Routes.HOME);
     }
+  }
+
+  //ini untuk menambahkan field position ke firestore
+  Future<void> updatePosisi(Position position) async { //function ini menerima parameter position dari funion changePage index 1
+    String uid = auth.currentUser!.uid;
+    await firestore.collection("pegawai").doc(uid).update({ //kit tambah /update field position di pegawai yang dalam bentuk map
+      "position" : {
+        "latitude" : position.latitude,
+        "longitude" : position.longitude
+      }
+    });
   }
 
 
