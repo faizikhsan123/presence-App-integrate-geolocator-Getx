@@ -26,7 +26,6 @@ class HomeView extends GetView<HomeController> {
                 return SizedBox();
               } else if (asyncSnapshot.connectionState ==
                   ConnectionState.active) {
-                  
                 String role = asyncSnapshot.data!.data()!['role'];
                 if (role == "admin") {
                   return IconButton(
@@ -43,14 +42,15 @@ class HomeView extends GetView<HomeController> {
           ),
         ],
       ),
-      body:  StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>( //kita stream 
-        stream: controller.roleStream(), //pakai stream role  
+      body: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+        stream: controller.roleStream(),
         builder: (context, asyncSnapshot) {
           if (asyncSnapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           }
-          var data = asyncSnapshot.data!.data(); //ambil data
-           String imageUrl ="https://ui-avatars.com/api/?name=${data!['nama']}&background=random&size=256"; //default gambar kalo photo null
+          var data = asyncSnapshot.data!.data();
+          String imageUrl =
+              "https://ui-avatars.com/api/?name=${data!['nama']}&background=random&size=256";
           return ListView(
             padding: EdgeInsets.all(20),
             children: [
@@ -61,12 +61,14 @@ class HomeView extends GetView<HomeController> {
                       width: 75,
                       height: 75,
                       color: Colors.grey[200],
-                      child: Center(child:   CircleAvatar(
-                        radius: 55,
-                        backgroundImage: data['photo'] == null //jika gambar null
-                            ? NetworkImage(imageUrl)
-                            : NetworkImage(data['photo']),
-                      ),),
+                      child: Center(
+                        child: CircleAvatar(
+                          radius: 55,
+                          backgroundImage: data['photo'] == null
+                              ? NetworkImage(imageUrl)
+                              : NetworkImage(data['photo']),
+                        ),
+                      ),
                     ),
                   ),
                   SizedBox(width: 10),
@@ -75,7 +77,10 @@ class HomeView extends GetView<HomeController> {
                     children: [
                       Text(
                         "Welcome",
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       Text("Jalan raya Medan"),
                     ],
@@ -91,17 +96,23 @@ class HomeView extends GetView<HomeController> {
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-          
+
                   children: [
                     Text(
-                      "${data['job']}", //ambil job
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      "${data['job']}",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     SizedBox(height: 20),
                     Text(
-                      "${data['nip']}", //ambil nip
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
-                    ), //ambil nama
+                      "${data['nip']}",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 30,
+                      ),
+                    ),
                     Text("${data['nama']}", style: TextStyle(fontSize: 18)),
                   ],
                 ),
@@ -127,11 +138,7 @@ class HomeView extends GetView<HomeController> {
                 ),
               ),
               SizedBox(height: 10),
-              Divider(
-                //widgett untuk membuat garis
-                thickness: 2, //mengatur ketebalan garis
-                color: Colors.amber,
-              ),
+              Divider(thickness: 2, color: Colors.amber),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -139,55 +146,82 @@ class HomeView extends GetView<HomeController> {
                     "Last 5 Days",
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                   ),
-                  TextButton(onPressed: () {}, child: Text("see more")),
+                  TextButton(onPressed: () {
+                    Get.toNamed(Routes.ALL_PRESENSI); //arahkan ke all presensi
+                  }, child: Text("see more")),
                 ],
               ),
               SizedBox(height: 10),
               ListView.builder(
-                shrinkWrap:
-                    true, //karena kita buat 2 widget scroll view maka menggunakan shrinkwrap agar tidak terjadi error (nonaktifkan scrollview)
-                physics: NeverScrollableScrollPhysics(), //jika memkai shrtinkwrap ttrue
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
                 itemCount: 5,
                 itemBuilder: (context, index) {
-                  return Container(
-                    padding: EdgeInsets.all(20),
-                    margin: EdgeInsets.only(bottom: 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Masuk",
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            Text(
-                              "${DateFormat.yMMMEd().format(DateTime.now())}",
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
-          
-                        Text("waktu ${DateFormat.jms().format(DateTime.now())}"),
-                        SizedBox(height: 10),
-                        Text(
-                          "keluar",
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        Text("waktu ${DateFormat.jms().format(DateTime.now())}"),
-                      ],
-                    ),
-                    decoration: BoxDecoration(
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 20),
+                    child: Material( //material untuk nembus inkwell
+                      borderRadius: BorderRadius.circular(20), //border radius material
                       color: Colors.grey[200],
-                      borderRadius: BorderRadius.circular(20),
+
+                      child: InkWell(
+                        onTap: () {
+                          Get.toNamed(Routes.DETAIL_PRESENSI); //arahkan ke detail presensi
+                        },
+
+                        borderRadius: BorderRadius.circular(
+                          20,
+                        ), //border radius inkwell
+                        child: Container(
+                          //kkarena container gapunya ontap kita bungkus inkwell
+                          padding: EdgeInsets.all(20),
+
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "Masuk",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    "${DateFormat.yMMMEd().format(DateTime.now())}",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              Text(
+                                "waktu ${DateFormat.jms().format(DateTime.now())}",
+                              ),
+                              SizedBox(height: 10),
+                              Text(
+                                "keluar",
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                "waktu ${DateFormat.jms().format(DateTime.now())}",
+                              ),
+                            ],
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                      ),
                     ),
                   );
                 },
               ),
             ],
           );
-        }
+        },
       ),
       bottomNavigationBar: Obx(
         () => ConvexAppBar(
