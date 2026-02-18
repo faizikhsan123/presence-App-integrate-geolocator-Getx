@@ -16,9 +16,9 @@ class HomeController extends GetxController {
     Get.offAllNamed(Routes.LOGIN);
   }
 
-  Stream<DocumentSnapshot<Map<String, dynamic>>> roleStream(){ //ini sttream
-    String uid = auth.currentUser!.uid; //ambil uid yg login
+  Stream<DocumentSnapshot<Map<String, dynamic>>> roleStream(){ 
+    String uid = auth.currentUser!.uid; 
 
-    return firestore.collection("pegawai").doc(uid).snapshots(); //ambil collection chats berdasarkan document uid
+    return firestore.collection("pegawai").doc(uid).snapshots(); 
   }
 }
