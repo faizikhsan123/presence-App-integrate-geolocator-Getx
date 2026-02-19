@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:presense_app/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:geocoding/geocoding.dart'; 
+import 'package:geocoding/geocoding.dart';
 
 class PageIndexController extends GetxController {
   RxInt currentIndex = 0.obs;
@@ -22,21 +22,16 @@ class PageIndexController extends GetxController {
         if (dataResponse["error"] == false) {
           Position position = dataResponse["position"];
           List<Placemark> placemarks = await placemarkFromCoordinates(
-            
-            position.latitude, 
-            position.longitude, 
+            position.latitude,
+            position.longitude,
           );
-          String alamat = "${placemarks[0].street}, ${placemarks[0].subLocality}, ${placemarks[0].locality}"; 
+          String alamat =
+              "${placemarks[0].street}, ${placemarks[0].subLocality}, ${placemarks[0].locality}";
 
-          await updatePosisi(position,alamat); 
+          await updatePosisi(position, alamat);
 
           await presensi(position, alamat); //function presensi
 
-          Get.snackbar(
-            'Berhasil',
-            "Presensi Berhasil",
-            backgroundColor: Colors.green,
-          );
         } else {
           Get.snackbar(
             "Error",
@@ -57,50 +52,83 @@ class PageIndexController extends GetxController {
     }
   }
 
-  Future<void> presensi(Position position, String alamat) async { //function presensi
+  Future<void> presensi(Position position, String alamat) async {
+    //function presensi
     String uid = auth.currentUser!.uid;
     //buat sub collection di pegawai dengan nama presence tiap pegawai
-   CollectionReference<Map<String, dynamic>> presensi = await firestore.collection("pegawai").doc(uid).collection("presence"); 
+    CollectionReference<Map<String, dynamic>> presensi = await firestore
+        .collection("pegawai")
+        .doc(uid)
+        .collection("presence");
 
-   QuerySnapshot<Map<String, dynamic>> snapPresence = await presensi.get();  //kita ambil dulu sub collection presence
+    QuerySnapshot<Map<String, dynamic>> snapPresence = await presensi.get(); //kita ambil dulu sub collection presence
 
-  DateTime now = DateTime.now(); //ini untuk doc id sub collection presence
-  String todaydocId = DateFormat.yMd().format(now).replaceAll('/', '-'); //format tanggal
-  
+    DateTime now = DateTime.now(); //ini untuk doc id sub collection presence
+    String todaydocId = DateFormat.yMd() .format(now).replaceAll('/', '-'); //format tanggal
 
-   if (snapPresence.docs.length == 0) { //jika sub collection presence masih kosong (belum pernah absen satupun)
-   await presensi.doc(todaydocId).set({ //buat absen pertama
-      "date" : now.toIso8601String(), //ini dipakai untuk mengurutkan sub collection
-      "masuk" : {
-       "date" : now.toIso8601String(),
-       "latitude" : position.latitude,
-       "longitude" : position.longitude,
-       "alamat" : alamat,
-       "status" : "Di dalam area"
+    if (snapPresence.docs.length == 0) {
+      //jika sub collection presence masih kosong (belum pernah absen satupun)
+      await presensi.doc(todaydocId).set({
+        //buat absen pertama
+        "date": now .toIso8601String(), //ini dipakai untuk mengurutkan sub collection
+        "masuk": {
+          "date": now.toIso8601String(),
+          "latitude": position.latitude,
+          "longitude": position.longitude,
+          "alamat": alamat,
+          "status": "Di dalam area",
+        },
+      });
+      Get.snackbar('Berhasil', 'Berhasil Absensi Masuk ');
+    } else {
+      //sudah pernah absen -> cek hari ini sudah absen atau belum
+      DocumentSnapshot<Map<String, dynamic>> todayDoc = await presensi.doc(todaydocId).get(); //ambil sub collection hari ini
+
+      if (todayDoc.exists == true) {
+        //hari ini sudah absen  //tinggal absen keluar
+        Map<String, dynamic> datapresensiToday = todayDoc.data()!; //ambil data sub collection hari ini
+        if (datapresensiToday["keluar"] != null) {
+          //sudah absen masuk dan keluar
+          Get.snackbar('Success', 'Anda sudah absen masuk dan keluar');
+          return;
+        } else { //hari ini uda absen tetapi belum absen keluar
+          await presensi.doc(todaydocId).update({
+            //update sub collection
+            "keluar": {
+              "date": now.toIso8601String(),
+              "latitude": position.latitude,
+              "longitude": position.longitude,
+              "alamat": alamat,
+              "status": "Di dalam area",
+            },
+          });
+          Get.snackbar('Success', 'Berhasil Absensi Keluar');
+        }
+      } else {
+        //hari ini belum absen
+        await presensi.doc(todaydocId).set({
+          "date": now.toIso8601String(),
+          "masuk": {
+            "date": now.toIso8601String(),
+            "latitude": position.latitude,
+            "longitude": position.longitude,
+            "alamat": alamat,
+            "status": "Di dalam area",
+          },
+        });
+        Get.snackbar('Success', 'Berhasil Absensi Masuk');
       }
-   });
-
-   }else {
-    //sudah pernah absen -> cek hari ini sudah absen atau belum
-    await presensi.doc(todaydocId).update({
-      
-    });
-
-   }
-
-   
-
-    
+    }
   }
 
-  Future<void> updatePosisi(Position position,String alamat) async { 
+  Future<void> updatePosisi(Position position, String alamat) async {
     String uid = auth.currentUser!.uid;
     await firestore.collection("pegawai").doc(uid).update({
       "position": {
         "latitude": position.latitude,
         "longitude": position.longitude,
       },
-      "alamat": alamat 
+      "alamat": alamat,
     });
   }
 

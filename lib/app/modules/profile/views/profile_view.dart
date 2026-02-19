@@ -30,11 +30,14 @@ class ProfileView extends GetView<ProfileController> {
             print(data);
 
             if (data == null) {
-              return const Center(child: Text("Data profile tidak ditemukan"));
+              return  Center(
+                child: TextButton(onPressed: (){
+                  Get.toNamed(Routes.LOGIN);
+                }, child: Text("lgout")),
+              );
             }
 
-            String imageUrl =
-                "https://ui-avatars.com/api/?name=${data['nama']}&background=random&size=256";
+            String imageUrl = "https://ui-avatars.com/api/?name=${data['nama']}&background=random&size=256";
 
             return SingleChildScrollView(
               padding: const EdgeInsets.all(16),
