@@ -30,8 +30,15 @@ class PageIndexController extends GetxController {
 
           await updatePosisi(position, alamat);
 
-          await presensi(position, alamat); //function presensi
+          //cek jarak
+         double jarak = Geolocator.distanceBetween(
+            position.latitude, //latitude awal
+            position.longitude, //longitude awal
+        -7.9129394, //latitude tujuan
+           112.6403355, //longitude tujuan
+          );
 
+          await presensi(position, alamat,jarak);
         } else {
           Get.snackbar(
             "Error",
@@ -52,60 +59,60 @@ class PageIndexController extends GetxController {
     }
   }
 
-  Future<void> presensi(Position position, String alamat) async {
-    //function presensi
+  Future<void> presensi(Position position, String alamat,double jarak) async {
     String uid = auth.currentUser!.uid;
-    //buat sub collection di pegawai dengan nama presence tiap pegawai
+
     CollectionReference<Map<String, dynamic>> presensi = await firestore
         .collection("pegawai")
         .doc(uid)
         .collection("presence");
 
-    QuerySnapshot<Map<String, dynamic>> snapPresence = await presensi.get(); //kita ambil dulu sub collection presence
+    QuerySnapshot<Map<String, dynamic>> snapPresence = await presensi.get();
 
-    DateTime now = DateTime.now(); //ini untuk doc id sub collection presence
-    String todaydocId = DateFormat.yMd() .format(now).replaceAll('/', '-'); //format tanggal
+    DateTime now = DateTime.now();
+    String todaydocId = DateFormat.yMd().format(now).replaceAll('/', '-');
+
+    String status = 'Di luar area'; //nilai default status
+
+    if (jarak <= 200) {
+      status = 'Di dalam area'; //jika jarak <= 200 meter maka status = Di dalam area
+    }
 
     if (snapPresence.docs.length == 0) {
-      //jika sub collection presence masih kosong (belum pernah absen satupun)
       await presensi.doc(todaydocId).set({
-        //buat absen pertama
-        "date": now .toIso8601String(), //ini dipakai untuk mengurutkan sub collection
+        "date": now.toIso8601String(),
         "masuk": {
           "date": now.toIso8601String(),
           "latitude": position.latitude,
           "longitude": position.longitude,
           "alamat": alamat,
-          "status": "Di dalam area",
+          "status": status, //ganti ini
         },
       });
       Get.snackbar('Berhasil', 'Berhasil Absensi Masuk ');
     } else {
-      //sudah pernah absen -> cek hari ini sudah absen atau belum
-      DocumentSnapshot<Map<String, dynamic>> todayDoc = await presensi.doc(todaydocId).get(); //ambil sub collection hari ini
+      DocumentSnapshot<Map<String, dynamic>> todayDoc = await presensi
+          .doc(todaydocId)
+          .get();
 
       if (todayDoc.exists == true) {
-        //hari ini sudah absen  //tinggal absen keluar
-        Map<String, dynamic> datapresensiToday = todayDoc.data()!; //ambil data sub collection hari ini
+        Map<String, dynamic> datapresensiToday = todayDoc.data()!;
         if (datapresensiToday["keluar"] != null) {
-          //sudah absen masuk dan keluar
           Get.snackbar('Success', 'Anda sudah absen masuk dan keluar');
           return;
-        } else { //hari ini uda absen tetapi belum absen keluar
+        } else {
           await presensi.doc(todaydocId).update({
-            //update sub collection
             "keluar": {
               "date": now.toIso8601String(),
               "latitude": position.latitude,
               "longitude": position.longitude,
               "alamat": alamat,
-              "status": "Di dalam area",
+              "status": status, //ganti ini
             },
           });
           Get.snackbar('Success', 'Berhasil Absensi Keluar');
         }
       } else {
-        //hari ini belum absen
         await presensi.doc(todaydocId).set({
           "date": now.toIso8601String(),
           "masuk": {
@@ -113,7 +120,7 @@ class PageIndexController extends GetxController {
             "latitude": position.latitude,
             "longitude": position.longitude,
             "alamat": alamat,
-            "status": "Di dalam area",
+            "status": status, //ganti ini
           },
         });
         Get.snackbar('Success', 'Berhasil Absensi Masuk');
