@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 import 'package:flutter/material.dart';
@@ -54,11 +52,6 @@ class HomeView extends GetView<HomeController> {
           String imageUrl =
               "https://ui-avatars.com/api/?name=${data!['nama']}&background=random&size=256";
 
-          //ubah bentuk mapping ke string (field position) 
-          Map<String,dynamic> posisi = data['position'];
-          String lokasi = posisi['latitude'].toString() + "," + posisi['longitude'].toString();
-
-
           return ListView(
             padding: EdgeInsets.all(20),
             children: [
@@ -90,7 +83,13 @@ class HomeView extends GetView<HomeController> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Text("${data['position'] == null ? "" : lokasi}", style: TextStyle(fontSize: 18)), //ambil lokasi
+                      Container(
+                        width: 200,
+                        child: Text(
+                          "${data['alamat'] == null ? "" : data['alamat']}",
+                          style: TextStyle(fontSize: 14),
+                        ),
+                      ), //ambil alamat yg sudah diubah ke bentuk alamat
                     ],
                   ),
                 ],
@@ -154,9 +153,12 @@ class HomeView extends GetView<HomeController> {
                     "Last 5 Days",
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                   ),
-                  TextButton(onPressed: () {
-                    Get.toNamed(Routes.ALL_PRESENSI); //arahkan ke all presensi
-                  }, child: Text("see more")),
+                  TextButton(
+                    onPressed: () {
+                      Get.toNamed(Routes.ALL_PRESENSI);
+                    },
+                    child: Text("see more"),
+                  ),
                 ],
               ),
               SizedBox(height: 10),
@@ -167,20 +169,17 @@ class HomeView extends GetView<HomeController> {
                 itemBuilder: (context, index) {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 20),
-                    child: Material( //material untuk nembus inkwell
-                      borderRadius: BorderRadius.circular(20), //border radius material
+                    child: Material(
+                      borderRadius: BorderRadius.circular(20),
                       color: Colors.grey[200],
 
                       child: InkWell(
                         onTap: () {
-                          Get.toNamed(Routes.DETAIL_PRESENSI); //arahkan ke detail presensi
+                          Get.toNamed(Routes.DETAIL_PRESENSI);
                         },
 
-                        borderRadius: BorderRadius.circular(
-                          20,
-                        ), //border radius inkwell
+                        borderRadius: BorderRadius.circular(20),
                         child: Container(
-                          //kkarena container gapunya ontap kita bungkus inkwell
                           padding: EdgeInsets.all(20),
 
                           child: Column(
