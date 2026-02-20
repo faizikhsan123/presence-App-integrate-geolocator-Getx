@@ -6,7 +6,8 @@ import 'package:intl/intl.dart';
 import '../controllers/detail_presensi_controller.dart';
 
 class DetailPresensiView extends GetView<DetailPresensiController> {
-  const DetailPresensiView({Key? key}) : super(key: key);
+  var data = Get .arguments; //ambil data dari halaman sebelumnya yg dilempar dari argument
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,7 +26,7 @@ class DetailPresensiView extends GetView<DetailPresensiController> {
                 children: [
                   Center(
                     child: Text(
-                      "${DateFormat.yMMMEd().format(DateTime.now())}",
+                      "${DateFormat.yMMMEd().format(DateTime.parse("${data['date']}"))}",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -33,15 +34,30 @@ class DetailPresensiView extends GetView<DetailPresensiController> {
                     ),
                   ),
                   SizedBox(height: 20),
+                  //ambil data datanya yg diambil dari argument
                   Text("Masuk", style: TextStyle(fontWeight: FontWeight.bold)),
-                  Text("Jam : ${DateFormat.jms().format(DateTime.now())} "),
-                  Text("Posisi : -6.0000, 106.0000 "),
-                  Text("Status : Di dalam area  "),
+                  Text(
+                    "Jam : ${DateFormat.jms().format(DateTime.parse("${data?['masuk']['date']}"))} ",
+                  ),
+                  Text(
+                    "Posisi : ${data?['masuk']['latitude']}, ${data?['masuk']['longitude']} ",
+                  ),
+                  Text("Status :${data?['masuk']['status']} "),
+                  Text("jarak :${data?['masuk']['jarak']} meter "),
+                  Text("alamat :${data?['masuk']['alamat']} "),
                   SizedBox(height: 20),
+
+                  //khusus untuk keluar dia bisa aja uda absen tapi blm absen keluar jadi kita cek
                   Text("keluar", style: TextStyle(fontWeight: FontWeight.bold)),
-                  Text("Jam : ${DateFormat.jms().format(DateTime.now())} "),
-                  Text("Posisi : -6.0000, 106.0000  "),
-                  Text("Status : Di dalam area  "),
+                  Text(
+                    "Jam : ${data?['keluar'] == null ? "-" : DateFormat.jms().format(DateTime.parse("${data?['keluar']['date']}"))} ",
+                  ),
+                 Text(
+                    "Posisi : ${data?['keluar'] == null ? "-" : data?['keluar']['latitude'] }, ${data?['keluar'] == null ? "-" : data?['keluar']['longitude']} ",
+                  ),
+                  Text("Status : ${data?['keluar'] == null ? "-" : data?['keluar']['status']} "),
+                  Text("jarak : ${data?['keluar'] == null ? "-" : "${data?['keluar']['jarak']} meter "}"),
+                  Text("Alamat : ${data?['keluar'] == null ? "-" : data?['keluar']['alamat']}"),
                 ],
               ),
               decoration: BoxDecoration(

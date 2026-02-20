@@ -132,7 +132,6 @@ class PageIndexController extends GetxController {
             title: "Absen Keluar",
             middleText: "apakah anda ingin absen Keluar hari ini?",
            
-            
             actions: [
               TextButton(
                 onPressed: () {

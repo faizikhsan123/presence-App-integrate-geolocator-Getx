@@ -225,7 +225,7 @@ class HomeView extends GetView<HomeController> {
 
                             child: InkWell(
                               onTap: () {
-                                Get.toNamed(Routes.DETAIL_PRESENSI);
+                                Get.toNamed(Routes.DETAIL_PRESENSI,arguments: dataPresence); //kirim data ke detail
                               },
 
                               borderRadius: BorderRadius.circular(20),
@@ -248,7 +248,7 @@ class HomeView extends GetView<HomeController> {
                                         Text(
                                           dataPresence['date'] == null
                                               ? "-"
-                                              : DateFormat.jms().format(
+                                              : DateFormat.yMMMEd().format(
                                                   DateTime.parse(
                                                     dataPresence['date'],
                                                   ),
