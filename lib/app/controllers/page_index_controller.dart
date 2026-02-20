@@ -30,15 +30,14 @@ class PageIndexController extends GetxController {
 
           await updatePosisi(position, alamat);
 
-          //cek jarak
-         double jarak = Geolocator.distanceBetween(
-            position.latitude, //latitude awal
-            position.longitude, //longitude awal
-        -7.9129394, //latitude tujuan
-           112.6403355, //longitude tujuan
+          double jarak = Geolocator.distanceBetween(
+            position.latitude,
+            position.longitude,
+            -7.9129394,
+            112.6403355,
           );
 
-          await presensi(position, alamat,jarak);
+          await presensi(position, alamat, jarak);
         } else {
           Get.snackbar(
             "Error",
@@ -59,7 +58,7 @@ class PageIndexController extends GetxController {
     }
   }
 
-  Future<void> presensi(Position position, String alamat,double jarak) async {
+  Future<void> presensi(Position position, String alamat, double jarak) async {
     String uid = auth.currentUser!.uid;
 
     CollectionReference<Map<String, dynamic>> presensi = await firestore
@@ -72,60 +71,129 @@ class PageIndexController extends GetxController {
     DateTime now = DateTime.now();
     String todaydocId = DateFormat.yMd().format(now).replaceAll('/', '-');
 
-    String status = 'Di luar area'; //nilai default status
+    String status = 'Di luar area';
 
     if (jarak <= 200) {
-      status = 'Di dalam area'; //jika jarak <= 200 meter maka status = Di dalam area
+      status = 'Di dalam area';
     }
 
     if (snapPresence.docs.length == 0) {
-      await presensi.doc(todaydocId).set({
-        "date": now.toIso8601String(),
-        "masuk": {
-          "date": now.toIso8601String(),
-          "latitude": position.latitude,
-          "longitude": position.longitude,
-          "alamat": alamat,
-          "status": status, //ganti ini
-          "jarak" : jarak //tambahkan ini di firestore
-        },
-      });
-      Get.snackbar('Berhasil', 'Berhasil Absensi Masuk ');
+      await Get.defaultDialog(
+        //validasi ketika belum pernah absen sama sekali
+        title: "Absen Masuk",
+        middleText: "apakah anda ingin absen hari ini?",
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: Text("cancel"),
+          ),
+          TextButton(
+            onPressed: () async {
+              await presensi.doc(todaydocId).set({
+                "date": now.toIso8601String(),
+                "masuk": {
+                  "date": now.toIso8601String(),
+                  "latitude": position.latitude,
+                  "longitude": position.longitude,
+                  "alamat": alamat,
+                  "status": status,
+                  "jarak": jarak,
+                },
+              });
+              Get.back();
+              Get.snackbar('success', 'Berhasil Absensi Masuk');
+            },
+            child: Text("Ya"),
+          ),
+        ],
+      );
     } else {
-      DocumentSnapshot<Map<String, dynamic>> todayDoc = await presensi
-          .doc(todaydocId)
-          .get();
+      DocumentSnapshot<Map<String, dynamic>> todayDoc =
+          await presensi //ambil absen hari ini
+              .doc(todaydocId)
+              .get();
 
       if (todayDoc.exists == true) {
+        //jika absen hari ini sudah ada
         Map<String, dynamic> datapresensiToday = todayDoc.data()!;
         if (datapresensiToday["keluar"] != null) {
-          Get.snackbar('Success', 'Anda sudah absen masuk dan keluar');
+          //dan key keluar sudah ada maka sudah absen masuk dan keluar
+          Get.snackbar(
+            'Warning', 
+            'Anda sudah absen masuk dan keluar',
+            colorText: Colors.white,
+            backgroundColor: Colors.redAccent
+            );
           return;
         } else {
-          await presensi.doc(todaydocId).update({
-            "keluar": {
-              "date": now.toIso8601String(),
-              "latitude": position.latitude,
-              "longitude": position.longitude,
-              "alamat": alamat,
-              "status": status, //ganti ini
-              "jarak" : jarak //tambahkan ini di firestore
-            },
-          });
+          await Get.defaultDialog( //ini uda absen masuk tapi belum absen keluar
+            title: "Absen Keluar",
+            middleText: "apakah anda ingin absen Keluar hari ini?",
+           
+            
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Get.back();
+                },
+                child: Text("cancel"),
+              ),
+              TextButton(
+                onPressed: () async {
+                  await presensi.doc(todaydocId).update({
+                    "keluar": {
+                      "date": now.toIso8601String(),
+                      "latitude": position.latitude,
+                      "longitude": position.longitude,
+                      "alamat": alamat,
+                      "status": status,
+                      "jarak": jarak,
+                    },
+                  });
+                  Get.back();
+                  Get.snackbar('success', 'Berhasil Absensi kkeluar');
+                },
+                child: Text("Ya"),
+              ),
+            ],
+          );
           Get.snackbar('Success', 'Berhasil Absensi Keluar');
         }
       } else {
-        await presensi.doc(todaydocId).set({
-          "date": now.toIso8601String(),
-          "masuk": {
-            "date": now.toIso8601String(),
-            "latitude": position.latitude,
-            "longitude": position.longitude,
-            "alamat": alamat,
-            "status": status, //ganti ini
-            "jarak" : jarak //tambahkan ini di firestore
-          },
-        });
+        //jika absen hari ini belum ada
+
+        await Get.defaultDialog(
+          title: "Absen Masuk",
+          middleText: "apakah anda ingin absen hari ini?",
+          actions: [
+            TextButton(
+              onPressed: () {
+                Get.back();
+              },
+              child: Text("cancel"),
+            ),
+            TextButton(
+              onPressed: () async {
+                await presensi.doc(todaydocId).set({
+                  "date": now.toIso8601String(),
+                  "masuk": {
+                    "date": now.toIso8601String(),
+                    "latitude": position.latitude,
+                    "longitude": position.longitude,
+                    "alamat": alamat,
+                    "status": status,
+                    "jarak": jarak,
+                  },
+                });
+                Get.back();
+                Get.snackbar('success', 'Berhasil Absensi Masuk');
+              },
+              child: Text("Ya"),
+            ),
+          ],
+        );
         Get.snackbar('Success', 'Berhasil Absensi Masuk');
       }
     }

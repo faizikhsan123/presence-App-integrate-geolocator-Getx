@@ -138,7 +138,8 @@ class HomeView extends GetView<HomeController> {
                         ConnectionState.waiting) {
                       return Center(child: CircularProgressIndicator());
                     }
-                    var data = asyncSnapshot.data?.data(); //ammbil datanya
+                    var data = asyncSnapshot.data?.data();
+
                     return Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
@@ -146,8 +147,11 @@ class HomeView extends GetView<HomeController> {
                           children: [
                             Text("Masuk"),
                             Text(
-                              //pengecekan jika belum absensi masuk maka tampilkan "-"
-                              "${data!['masuk'] == null ? "" : DateFormat.jms().format(DateTime.parse("${data['masuk']['date']}"))}",
+                              data?['masuk'] == null
+                                  ? "-"
+                                  : DateFormat.jms().format(
+                                      DateTime.parse(data!['masuk']['date']),
+                                    ),
                             ),
                           ],
                         ),
@@ -160,8 +164,11 @@ class HomeView extends GetView<HomeController> {
                           children: [
                             Text("Keluar"),
                             Text(
-                              //pengecekan jika belum absensi kelaur maka tampilkan "-"
-                              "${data!['keluar'] == null ? "-" : DateFormat.jms().format(DateTime.parse("${data['keluar']['date']}"))}",
+                              data?['keluar'] == null
+                                  ? "-"
+                                  : DateFormat.jms().format(
+                                      DateTime.parse(data!['keluar']['date']),
+                                    ),
                             ),
                           ],
                         ),
@@ -209,6 +216,7 @@ class HomeView extends GetView<HomeController> {
                       reverse: true, //
                       itemBuilder: (context, index) {
                         var dataPresence = data[index].data();
+
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 20),
                           child: Material(
@@ -238,7 +246,13 @@ class HomeView extends GetView<HomeController> {
                                           ),
                                         ),
                                         Text(
-                                          "${DateFormat.yMMMEd().format(DateTime.parse(dataPresence['date']))}",
+                                          dataPresence['date'] == null
+                                              ? "-"
+                                              : DateFormat.jms().format(
+                                                  DateTime.parse(
+                                                    dataPresence['date'],
+                                                  ),
+                                                ),
                                           style: TextStyle(
                                             fontWeight: FontWeight.bold,
                                           ),
