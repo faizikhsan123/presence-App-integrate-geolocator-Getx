@@ -87,6 +87,7 @@ class PageIndexController extends GetxController {
           "longitude": position.longitude,
           "alamat": alamat,
           "status": status, //ganti ini
+          "jarak" : jarak //tambahkan ini di firestore
         },
       });
       Get.snackbar('Berhasil', 'Berhasil Absensi Masuk ');
@@ -108,6 +109,7 @@ class PageIndexController extends GetxController {
               "longitude": position.longitude,
               "alamat": alamat,
               "status": status, //ganti ini
+              "jarak" : jarak //tambahkan ini di firestore
             },
           });
           Get.snackbar('Success', 'Berhasil Absensi Keluar');
@@ -121,6 +123,7 @@ class PageIndexController extends GetxController {
             "longitude": position.longitude,
             "alamat": alamat,
             "status": status, //ganti ini
+            "jarak" : jarak //tambahkan ini di firestore
           },
         });
         Get.snackbar('Success', 'Berhasil Absensi Masuk');

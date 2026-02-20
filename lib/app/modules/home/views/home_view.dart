@@ -89,7 +89,7 @@ class HomeView extends GetView<HomeController> {
                           "${data['alamat'] == null ? "" : data['alamat']}",
                           style: TextStyle(fontSize: 14),
                         ),
-                      ), //ambil alamat yg sudah diubah ke bentuk alamat
+                      ),
                     ],
                   ),
                 ],
@@ -162,68 +162,111 @@ class HomeView extends GetView<HomeController> {
                 ],
               ),
               SizedBox(height: 10),
-              ListView.builder(
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                itemCount: 5,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 20),
-                    child: Material(
-                      borderRadius: BorderRadius.circular(20),
-                      color: Colors.grey[200],
+              StreamBuilder<QuerySnapshot<Map<String, dynamic>>>( //STREAM
+                stream: controller.presenceStream(), 
+                builder: (context, asyncSnapshot) {
+                  if (asyncSnapshot.connectionState ==
+                      ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  }
 
-                      child: InkWell(
-                        onTap: () {
-                          Get.toNamed(Routes.DETAIL_PRESENSI);
-                        },
+                  if (asyncSnapshot.connectionState == ConnectionState.active) {
+                    var data = asyncSnapshot  .data!  .docs; //data dari snapp berbentuk list
 
-                        borderRadius: BorderRadius.circular(20),
-                        child: Container(
-                          padding: EdgeInsets.all(20),
-
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    "Masuk",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Text(
-                                    "${DateFormat.yMMMEd().format(DateTime.now())}",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-
-                              Text(
-                                "waktu ${DateFormat.jms().format(DateTime.now())}",
-                              ),
-                              SizedBox(height: 10),
-                              Text(
-                                "keluar",
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              Text(
-                                "waktu ${DateFormat.jms().format(DateTime.now())}",
-                              ),
-                            ],
-                          ),
-                          decoration: BoxDecoration(
+                    if (data.isEmpty) {
+                      //jika sub collection presence tidak ada data (document)
+                      return Center(child: Text("Belum ada presensi"));
+                    } //jika ada data
+                    return ListView.builder(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      itemCount: data.length,
+                      reverse: true, //
+                      itemBuilder: (context, index) {
+                        var dataPresence = data[index].data(); //data yg dari list atas diubah menjadi map
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 20),
+                          child: Material(
                             borderRadius: BorderRadius.circular(20),
+                            color: Colors.grey[200],
+
+                            child: InkWell(
+                              onTap: () {
+                                Get.toNamed(Routes.DETAIL_PRESENSI);
+                              },
+
+                              borderRadius: BorderRadius.circular(20),
+                              child: Container(
+                                padding: EdgeInsets.all(20),
+
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          "Masuk",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        Text(
+                                          "${DateFormat.yMMMEd().format(DateTime.parse(dataPresence['date']))}", //AMBIL DATA TANGGAL
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Text(
+                                      dataPresence['masuk']== null //PENGECEKAN NULL
+                                          ? ""
+                                          : DateFormat.jms().format(
+                                              DateTime.parse(
+                                                dataPresence['masuk']['date'], //AMBIL DATA MASK DAN JAM NYA
+                                              ),
+                                            ),
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+
+                                 
+                                    SizedBox(height: 10),
+                                    Text(
+                                      "keluar",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                     Text(
+                                      dataPresence['keluar']== null //PENGECEKAN NULL
+                                          ? ""
+                                          : DateFormat.jms().format(
+                                              DateTime.parse(
+                                                dataPresence['keluar']['date'], //AMBIL DATA KELUAR DAN JAM NYA
+                                              ),
+                                            ),
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                    ),
-                  );
+                        );
+                      },
+                    );
+                  }
+
+                  return Center(child: CircularProgressIndicator());
                 },
               ),
             ],

@@ -21,4 +21,12 @@ class HomeController extends GetxController {
 
     return firestore.collection("pegawai").doc(uid).snapshots(); 
   }
-}
+
+  Stream<QuerySnapshot<Map<String, dynamic>>> presenceStream(){
+    String uid = auth.currentUser!.uid;
+    //ambil di sub collectio presence diurutkan  berdasarkan date 
+    //lalu hanya ambil 5 data terakhir
+    return firestore.collection("pegawai").doc(uid).collection("presence").orderBy("date").limitToLast(5).snapshots();
+  }
+
+ }
