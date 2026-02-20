@@ -131,17 +131,43 @@ class HomeView extends GetView<HomeController> {
                   borderRadius: BorderRadius.circular(20),
                   color: Colors.grey[200],
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Column(children: [Text("Masuk"), Text("-")]),
-                    Container(
-                      width: 2,
-                      height: 40,
-                      color: const Color.fromARGB(255, 133, 126, 103),
-                    ),
-                    Column(children: [Text("Masuk"), Text("-")]),
-                  ],
+                child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                  stream: controller.TodayStream(),
+                  builder: (context, asyncSnapshot) {
+                    if (asyncSnapshot.connectionState ==
+                        ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    }
+                    var data = asyncSnapshot.data?.data(); //ammbil datanya
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Column(
+                          children: [
+                            Text("Masuk"),
+                            Text(
+                              //pengecekan jika belum absensi masuk maka tampilkan "-"
+                              "${data!['masuk'] == null ? "" : DateFormat.jms().format(DateTime.parse("${data['masuk']['date']}"))}",
+                            ),
+                          ],
+                        ),
+                        Container(
+                          width: 2,
+                          height: 40,
+                          color: const Color.fromARGB(255, 133, 126, 103),
+                        ),
+                        Column(
+                          children: [
+                            Text("Keluar"),
+                            Text(
+                              //pengecekan jika belum absensi kelaur maka tampilkan "-"
+                              "${data!['keluar'] == null ? "-" : DateFormat.jms().format(DateTime.parse("${data['keluar']['date']}"))}",
+                            ),
+                          ],
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ),
               SizedBox(height: 10),
@@ -162,8 +188,8 @@ class HomeView extends GetView<HomeController> {
                 ],
               ),
               SizedBox(height: 10),
-              StreamBuilder<QuerySnapshot<Map<String, dynamic>>>( //STREAM
-                stream: controller.presenceStream(), 
+              StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                stream: controller.presenceStream(),
                 builder: (context, asyncSnapshot) {
                   if (asyncSnapshot.connectionState ==
                       ConnectionState.waiting) {
@@ -171,10 +197,9 @@ class HomeView extends GetView<HomeController> {
                   }
 
                   if (asyncSnapshot.connectionState == ConnectionState.active) {
-                    var data = asyncSnapshot  .data!  .docs; //data dari snapp berbentuk list
+                    var data = asyncSnapshot.data!.docs;
 
                     if (data.isEmpty) {
-                      //jika sub collection presence tidak ada data (document)
                       return Center(child: Text("Belum ada presensi"));
                     } //jika ada data
                     return ListView.builder(
@@ -183,7 +208,7 @@ class HomeView extends GetView<HomeController> {
                       itemCount: data.length,
                       reverse: true, //
                       itemBuilder: (context, index) {
-                        var dataPresence = data[index].data(); //data yg dari list atas diubah menjadi map
+                        var dataPresence = data[index].data();
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 20),
                           child: Material(
@@ -213,7 +238,7 @@ class HomeView extends GetView<HomeController> {
                                           ),
                                         ),
                                         Text(
-                                          "${DateFormat.yMMMEd().format(DateTime.parse(dataPresence['date']))}", //AMBIL DATA TANGGAL
+                                          "${DateFormat.yMMMEd().format(DateTime.parse(dataPresence['date']))}",
                                           style: TextStyle(
                                             fontWeight: FontWeight.bold,
                                           ),
@@ -221,11 +246,11 @@ class HomeView extends GetView<HomeController> {
                                       ],
                                     ),
                                     Text(
-                                      dataPresence['masuk']== null //PENGECEKAN NULL
-                                          ? ""
+                                      dataPresence['masuk'] == null
+                                          ? "-"
                                           : DateFormat.jms().format(
                                               DateTime.parse(
-                                                dataPresence['masuk']['date'], //AMBIL DATA MASK DAN JAM NYA
+                                                dataPresence['masuk']['date'],
                                               ),
                                             ),
                                       style: TextStyle(
@@ -233,7 +258,6 @@ class HomeView extends GetView<HomeController> {
                                       ),
                                     ),
 
-                                 
                                     SizedBox(height: 10),
                                     Text(
                                       "keluar",
@@ -241,12 +265,12 @@ class HomeView extends GetView<HomeController> {
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                     Text(
-                                      dataPresence['keluar']== null //PENGECEKAN NULL
-                                          ? ""
+                                    Text(
+                                      dataPresence['keluar'] == null
+                                          ? "-"
                                           : DateFormat.jms().format(
                                               DateTime.parse(
-                                                dataPresence['keluar']['date'], //AMBIL DATA KELUAR DAN JAM NYA
+                                                dataPresence['keluar']['date'],
                                               ),
                                             ),
                                       style: TextStyle(
